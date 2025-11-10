@@ -9,6 +9,10 @@ A simple AI chatbot with terminal-style UI built with React + TypeScript fronten
 - 🧠 Thinking Mode toggle:
   - ON: Uses `LongCat-Thinker` model (deeper reasoning)
   - OFF: Uses `LongCat-Flash-Chat` model (faster responses)
+- 💾 **MongoDB Integration**: Persistent chat history storage
+- 📜 **Chat History**: Loads last 50 messages on startup
+- 🔄 **Context Window**: Sends last 10 messages to AI for conversation continuity
+- 📊 **Comprehensive Logging**: Detailed server-side logs for all operations
 - ⚡ Single-page application (no routing)
 - 🔒 Type-safe TypeScript implementation
 
@@ -24,24 +28,35 @@ A simple AI chatbot with terminal-style UI built with React + TypeScript fronten
 - FastAPI (Python web framework)
 - HTTPX (async HTTP client)
 - Python-dotenv (environment variables)
+- Motor (async MongoDB driver)
+- PyMongo (MongoDB driver)
 
 ## Project Structure
 
 ```
 Isabella/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── ChatWindow.tsx
-│   │   │   └── ThinkingToggle.tsx
-│   │   ├── App.tsx
-│   │   ├── main.tsx
-│   │   └── index.css
-│   └── package.json
+├── src/                    # Frontend React application
+│   ├── components/
+│   │   ├── ChatWindow.tsx
+│   │   └── ThinkingToggle.tsx
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── index.css
 ├── backend/
-│   ├── main.py
+│   ├── config/            # Configuration modules
+│   │   └── database.py    # MongoDB connection
+│   ├── models/            # Data models
+│   │   └── chat.py
+│   ├── routes/            # API routes
+│   │   └── chat.py
+│   ├── services/          # Business logic
+│   │   └── chat_service.py
+│   ├── utils/             # Utilities
+│   │   └── logger.py
+│   ├── main.py            # FastAPI entry point
 │   ├── requirements.txt
-│   └── .env.example
+│   └── README.md          # Backend documentation
+├── package.json
 └── README.md
 ```
 
@@ -49,35 +64,42 @@ Isabella/
 
 ### Backend Setup
 
-1. Navigate to the backend directory:
+1. **Install and start MongoDB:**
+   ```bash
+   # Using Docker (recommended)
+   docker run -d -p 27017:27017 --name mongodb mongo:7.0
+   
+   # Or install MongoDB locally and start it
+   # mongod --dbpath /path/to/data
+   ```
+
+2. Navigate to the backend directory:
    ```bash
    cd backend
    ```
 
-2. Create and activate a virtual environment:
+3. Create and activate a virtual environment:
    ```bash
    python3 -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-3. Install dependencies:
+4. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-4. Create a `.env` file with your LongCat API key:
+5. Create a `.env` file with your LongCat API key:
    ```bash
-   cp .env.example .env
-   # Edit .env and add your API key:
-   # LONGCAT_API_KEY=your_actual_api_key_here
+   echo "LONGCAT_API_KEY=your_actual_api_key_here" > .env
    ```
 
-5. Start the FastAPI server:
+6. Start the FastAPI server:
    ```bash
-   uvicorn main:app --reload --port 8000
+   uvicorn main:app --reload --port 5000
    ```
 
-   The backend will run at: `http://localhost:8000`
+   The backend will run at: `http://localhost:5000`
 
 ### Frontend Setup
 
@@ -126,6 +148,25 @@ Send a message to the AI chatbot.
 }
 ```
 
+### GET `/messages`
+Fetch the last 50 messages from chat history.
+
+**Response:**
+```json
+{
+  "messages": [
+    {
+      "_id": "...",
+      "role": "user",
+      "content": "Hello!",
+      "timestamp": "2025-11-10T14:02:31.537000",
+      "thinking": false,
+      "model": "LongCat-Flash-Chat"
+    }
+  ]
+}
+```
+
 ## Development
 
 ### Build Frontend
@@ -148,12 +189,45 @@ npm test
 ### Backend `.env`
 - `LONGCAT_API_KEY`: Your LongCat API key (required)
 
+## MongoDB Configuration
+
+The application uses MongoDB to store chat history:
+- **Connection URL**: `mongodb://127.0.0.1:27017/isabella`
+- **Database**: `isabella`
+- **Collection**: `chats`
+
+### Database Schema
+```javascript
+{
+  "_id": ObjectId,
+  "role": String,          // "user" or "assistant"
+  "content": String,       // Message content
+  "timestamp": ISODate,    // Message timestamp
+  "thinking": Boolean,     // Thinking mode enabled
+  "model": String          // AI model used
+}
+```
+
+## Logging
+
+The backend provides comprehensive logging for debugging and monitoring:
+- MongoDB connection status
+- All user messages and AI responses
+- Context window contents (last 10 messages sent to AI)
+- API calls and errors
+- Database operations
+
+Check the server console for detailed logs of all operations.
+
 ## Notes
 
-- The backend must be running on port 8000 for the frontend to connect properly
+- The backend must be running on port 5000 for the frontend to connect properly
+- MongoDB must be running on port 27017 (default)
 - Update the API URL in `App.tsx` if deploying to production
 - For production use, configure CORS properly in `main.py` with specific allowed origins
-- The terminal styling uses monospace fonts and green (#00ff66) text on black (#000) background
+- The terminal styling uses monospace fonts and green (#0f0) text on black (#111) background
+- Chat history is automatically loaded when the page loads
+- The AI receives the last 10 messages as context for better conversation continuity
 
 ## License
 

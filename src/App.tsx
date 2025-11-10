@@ -9,6 +9,14 @@ interface Message {
   content: string;
 }
 
+interface DbMessage {
+  role: string;
+  content: string;
+  timestamp?: string;
+  thinking?: boolean;
+  model?: string;
+}
+
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -19,10 +27,10 @@ function App() {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/messages');
+        const response = await axios.get<{ messages: DbMessage[] }>('http://localhost:5000/messages');
         if (response.data.messages) {
-          const formattedMessages = response.data.messages.map((msg: any) => ({
-            role: msg.role,
+          const formattedMessages: Message[] = response.data.messages.map((msg) => ({
+            role: msg.role as 'user' | 'assistant',
             content: msg.content
           }));
           setMessages(formattedMessages);

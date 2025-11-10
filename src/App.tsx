@@ -48,50 +48,43 @@ function App() {
   };
 
   return (
-    <div style={{
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: '#000',
-      display: 'flex',
-      flexDirection: 'column',
-      margin: 0,
-      padding: 0,
-      overflow: 'hidden'
-    }}>
-      <div style={{
-        padding: '20px',
-        borderBottom: '1px solid #00ff66',
+    <div
+      style={{
+        color: '#fff',
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        height: '100vh',
+        backgroundColor: '#111',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <h1 style={{
-          color: '#00ff66',
-          fontFamily: 'monospace',
-          fontSize: '20px',
-          margin: 0
-        }}>
-          {'> AI TERMINAL'}
-        </h1>
-        <ThinkingToggle thinking={thinking} onToggle={setThinking} />
+        flexDirection: 'column',
+        paddingBottom: '20px',
+        margin: 0,
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '10px 0',
+        }}
+      >
+      
+      
       </div>
 
       <ChatWindow messages={messages} />
 
-      <div style={{
-        padding: '20px',
-        borderTop: '1px solid #00ff66',
-        display: 'flex',
-        gap: '10px',
-        alignItems: 'center'
-      }}>
-        <span style={{
-          color: '#00ff66',
-          fontFamily: 'monospace',
-          fontSize: '14px'
-        }}>
-          {'>'}
-        </span>
+      <div
+        style={{
+          display: 'flex',
+          marginTop: '5px',
+          padding: '0 0',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
         <input
           type="text"
           value={input}
@@ -101,31 +94,32 @@ function App() {
           placeholder="Type your message..."
           style={{
             flex: 1,
-            backgroundColor: '#000',
-            border: 'none',
-            color: '#00ff66',
-            fontFamily: 'monospace',
-            fontSize: '14px',
+            padding: '8px',
+            background: '#111',
+            color: '#fff',
+            border: '1px solid #333',
             outline: 'none',
-            padding: '8px'
           }}
         />
+          
         <button
           onClick={handleSend}
           disabled={loading}
           style={{
-            backgroundColor: '#000',
-            border: '1px solid #00ff66',
-            color: '#00ff66',
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            padding: '8px 16px',
+            padding: '8px 12px',
+            background: '#0f0',
+            border: 'none',
+            borderRadius: '5px',
             cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.5 : 1
+            opacity: loading ? 0.6 : 1,
+            color: '#111',
+            fontWeight: 600,
           }}
         >
-          {loading ? 'SENDING...' : 'SEND'}
+          
+          {loading ? 'SENDING...' : 'Send'}
         </button>
+        <ThinkingToggle thinking={thinking} onToggle={setThinking} />
       </div>
     </div>
   );

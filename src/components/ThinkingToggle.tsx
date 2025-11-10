@@ -26,10 +26,10 @@ const ThinkingToggle: React.FC<ThinkingToggleProps> = ({ thinking, onToggle }) =
             height: '18px'
           }}
         />
-        <span>Thinking Mode</span>
+        <span>Thinking</span>
       </label>
       <span style={{ color: '#00ff66', opacity: 0.7 }}>
-        [{thinking ? 'LongCat-Thinker' : 'LongCat-Flash-Chat'}]
+        [{thinking ? 'LongCat-Think' : 'LongCat-Flash-Chat'}]
       </span>
     </div>
   );

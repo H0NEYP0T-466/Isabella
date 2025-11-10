@@ -1,4 +1,3 @@
-"""Database configuration for MongoDB connection."""
 import logging
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Optional
@@ -11,13 +10,11 @@ class Database:
 
     @classmethod
     async def connect_db(cls):
-        """Establish connection to MongoDB."""
         try:
             mongodb_url = "mongodb://127.0.0.1:27017/isabella"
             cls.client = AsyncIOMotorClient(mongodb_url)
             cls.db = cls.client.isabella
             
-            # Test the connection
             await cls.client.admin.command('ping')
             logger.info(f"✓ MongoDB connection established: {mongodb_url}")
             logger.info(f"✓ Connected to database: isabella")

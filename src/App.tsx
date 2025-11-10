@@ -23,7 +23,6 @@ function App() {
   const [thinking, setThinking] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Fetch chat history on component mount
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {

@@ -1,10 +1,9 @@
-"""Chat message models."""
+
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
 class ChatMessage(BaseModel):
-    """Chat message model for database storage."""
     role: str  # 'user' or 'assistant'
     content: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)

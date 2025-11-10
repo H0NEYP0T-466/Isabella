@@ -1,4 +1,3 @@
-"""Chat routes for the API."""
 import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -30,12 +29,11 @@ async def chat(request: ChatRequest):
         logger.error("✗ LONGCAT_API_KEY not configured")
         raise HTTPException(status_code=500, detail="LONGCAT_API_KEY not configured")
     
-    # Determine model based on thinking mode
     model = "LongCat-Thinker" if request.thinking else "LongCat-Flash-Chat"
     logger.info(f"Selected model: {model}")
     
     try:
-        # Save user message to database
+
         await ChatService.save_message(
             role="user",
             content=request.message,
@@ -43,20 +41,28 @@ async def chat(request: ChatRequest):
             model=model
         )
         
-        # Get context window (last 10 messages)
+
         context_messages = await ChatService.get_context_messages(limit=10)
         
-        # Add current user message to context
-        messages = context_messages + [{"role": "user", "content": request.message}]
-        
+        messages = [
+            {
+            "role": "system",
+            "content" :("You are Isabella/bella."
+            "This is a conversation between you and a human user. Use the context of previous messages to inform your replies."
+            + str(context_messages) +
+            "now, respond to the user's latest message.")
+            },
+            {"role": "user", "content": request.message}
+        ]
+
+        logger.info("this the messages" + str(messages))
         logger.info(f"Context window: {len(context_messages)} previous messages")
         logger.info("Context messages:")
         for i, msg in enumerate(context_messages, 1):
             role = msg["role"]
             content_preview = msg["content"][:100] + "..." if len(msg["content"]) > 100 else msg["content"]
             logger.info(f"  [{i}] {role}: {content_preview}")
-        
-        # Call LongCat API
+
         longcat_url = "https://api.longcat.chat/openai/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -65,8 +71,8 @@ async def chat(request: ChatRequest):
         payload = {
             "model": model,
             "messages": messages,
-            "max_tokens": 1000,
-            "temperature": 0.7
+            "max_tokens": 8192,
+            "temperature": 1.0,
         }
         
         logger.info("🔄 Calling LongCat API...")
@@ -80,8 +86,7 @@ async def chat(request: ChatRequest):
             
             logger.info(f"✓ Received AI response - Length: {len(ai_reply)} chars")
             logger.info(f"AI response preview: {ai_reply[:200]}...")
-            
-            # Save AI response to database
+
             await ChatService.save_message(
                 role="assistant",
                 content=ai_reply,

@@ -22,7 +22,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
         messages.map((msg, idx) => (
           <div key={idx} style={{ marginBottom: '8px' }}>
             <span style={{ color: '#0f0' }}>
-              {msg.role === 'user' ? 'HONEYPOT' : 'Isabella'}:
+              {msg.role === 'user' ? '~honeypot' : 'Isabella'}:
             </span>{' '}
             <ReactMarkdown
               children={msg.content}

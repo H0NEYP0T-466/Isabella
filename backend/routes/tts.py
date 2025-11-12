@@ -67,28 +67,27 @@ async def get_audio(filename: str):
         FileResponse with the audio file
     """
     import os
+    import re
     from pathlib import Path
     
     logger.info(f"📥 Audio file requested: {filename}")
     
-    # Validate filename format (security check)
-    # Only allow alphanumeric, hyphens, underscores, and dots
-    if not filename.startswith("speech_") or not filename.endswith(".wav"):
+    # Strict validation: only allow exact pattern speech_<uuid>.wav
+    # This prevents any path traversal attacks
+    if not re.match(r'^speech_[a-f0-9\-]+\.wav$', filename):
         logger.error(f"✗ Invalid filename format: {filename}")
         raise HTTPException(status_code=400, detail="Invalid filename format")
     
-    # Additional security: check for path traversal attempts
-    if ".." in filename or "/" in filename or "\\" in filename:
-        logger.error(f"✗ Path traversal attempt detected: {filename}")
-        raise HTTPException(status_code=400, detail="Invalid filename")
-    
     try:
-        audio_path = TTSService.get_audio_path(filename)
-        
-        # Ensure the resolved path is within the output directory (prevents path traversal)
+        # Use only the validated filename, not the user input directly in path operations
         output_dir = TTSService.OUTPUT_DIR.resolve()
-        resolved_audio_path = audio_path.resolve()
         
+        # Construct safe path by only using the basename (strips any directory components)
+        safe_filename = os.path.basename(filename)
+        audio_path = output_dir / safe_filename
+        
+        # Double check the resolved path is within output directory
+        resolved_audio_path = audio_path.resolve()
         if not str(resolved_audio_path).startswith(str(output_dir)):
             logger.error(f"✗ Path traversal attempt blocked: {filename}")
             raise HTTPException(status_code=400, detail="Invalid filename")
@@ -97,11 +96,11 @@ async def get_audio(filename: str):
             logger.error(f"✗ Audio file not found: {filename}")
             raise HTTPException(status_code=404, detail="Audio file not found")
         
-        logger.info(f"✓ Serving audio file: {filename}")
+        logger.info(f"✓ Serving audio file: {safe_filename}")
         return FileResponse(
             path=str(resolved_audio_path),
             media_type="audio/wav",
-            filename=filename
+            filename=safe_filename
         )
         
     except HTTPException:

@@ -66,23 +66,40 @@ async def get_audio(filename: str):
     Returns:
         FileResponse with the audio file
     """
+    import os
+    from pathlib import Path
+    
     logger.info(f"📥 Audio file requested: {filename}")
     
     # Validate filename format (security check)
+    # Only allow alphanumeric, hyphens, underscores, and dots
     if not filename.startswith("speech_") or not filename.endswith(".wav"):
         logger.error(f"✗ Invalid filename format: {filename}")
         raise HTTPException(status_code=400, detail="Invalid filename format")
     
+    # Additional security: check for path traversal attempts
+    if ".." in filename or "/" in filename or "\\" in filename:
+        logger.error(f"✗ Path traversal attempt detected: {filename}")
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    
     try:
         audio_path = TTSService.get_audio_path(filename)
         
-        if not audio_path.exists():
+        # Ensure the resolved path is within the output directory (prevents path traversal)
+        output_dir = TTSService.OUTPUT_DIR.resolve()
+        resolved_audio_path = audio_path.resolve()
+        
+        if not str(resolved_audio_path).startswith(str(output_dir)):
+            logger.error(f"✗ Path traversal attempt blocked: {filename}")
+            raise HTTPException(status_code=400, detail="Invalid filename")
+        
+        if not resolved_audio_path.exists():
             logger.error(f"✗ Audio file not found: {filename}")
             raise HTTPException(status_code=404, detail="Audio file not found")
         
         logger.info(f"✓ Serving audio file: {filename}")
         return FileResponse(
-            path=audio_path,
+            path=str(resolved_audio_path),
             media_type="audio/wav",
             filename=filename
         )

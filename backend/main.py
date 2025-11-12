@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from config.database import Database
 from routes.chat import router as chat_router
+from routes.tts import router as tts_router
 from utils.logger import setup_logger
 
 load_dotenv()
@@ -33,6 +34,7 @@ app.add_middleware(
 )
 
 app.include_router(chat_router)
+app.include_router(tts_router)
 
 @app.get("/")
 async def root():

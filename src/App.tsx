@@ -7,6 +7,7 @@ import './App.css';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  audioFile?: string;
 }
 
 interface DbMessage {
@@ -56,7 +57,19 @@ function App() {
         thinking: thinking
       });
 
-      setMessages(prev => [...prev, { role: 'assistant', content: response.data.reply }]);
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: response.data.reply,
+        audioFile: response.data.audio_file
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+      
+      // Auto-play audio if available
+      if (response.data.audio_file) {
+        const audio = new Audio(`http://localhost:5000/tts/audio/${response.data.audio_file}`);
+        audio.play().catch(err => console.error('Error playing audio:', err));
+      }
     } catch (error) {
       const errorMsg = axios.isAxiosError(error) 
         ? `Error: ${error.response?.data?.detail || error.message}`

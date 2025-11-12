@@ -1,1 +1,5 @@
 .env
+piper_tts/output/
+piper_tts/piper/piper
+piper_tts/*.onnx
+piper_tts/*.json

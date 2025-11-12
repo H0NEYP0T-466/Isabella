@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  audioFile?: string;
 }
 
 interface ChatWindowProps {
@@ -11,6 +12,13 @@ interface ChatWindowProps {
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
     <div
       style={{
@@ -67,9 +75,23 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
                 ),
               }}
             />
+            {msg.audioFile && (
+              <div style={{ marginTop: '4px' }}>
+                <audio
+                  controls
+                  src={`http://localhost:5000/tts/audio/${msg.audioFile}`}
+                  style={{
+                    width: '200px',
+                    height: '30px',
+                  }}
+                />
+              </div>
+            )}
           </div>
         ))
       )}
+      {/* Invisible element to scroll to */}
+      <div ref={chatEndRef} />
     </div>
   );
 };

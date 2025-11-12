@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import httpx
 import os
 from services.chat_service import ChatService
+from services.tts_service import TTSService
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
+    audio_file: str = None
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
@@ -94,10 +96,20 @@ async def chat(request: ChatRequest):
                 model=model
             )
             
+            # Generate TTS audio for the AI response
+            audio_filename = None
+            try:
+                logger.info("🔊 Generating TTS audio for AI response...")
+                audio_filename = await TTSService.generate_speech(ai_reply)
+                logger.info(f"✓ TTS audio generated: {audio_filename}")
+            except Exception as tts_error:
+                logger.warning(f"⚠️ TTS generation failed (non-critical): {str(tts_error)}")
+                # Continue without TTS if it fails
+            
             logger.info("✓ Chat request completed successfully")
             logger.info("=" * 80)
             
-            return ChatResponse(reply=ai_reply)
+            return ChatResponse(reply=ai_reply, audio_file=audio_filename)
             
     except httpx.HTTPError as e:
         logger.error(f"✗ Error calling LongCat API: {str(e)}")

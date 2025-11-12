@@ -13,6 +13,8 @@ A simple AI chatbot with terminal-style UI built with React + TypeScript fronten
 - 📜 **Chat History**: Loads last 50 messages on startup
 - 🔄 **Context Window**: Sends last 10 messages to AI for conversation continuity
 - 📊 **Comprehensive Logging**: Detailed server-side logs for all operations
+- 📜 **Auto-scroll**: Chat window automatically scrolls to show new messages
+- 🔊 **Text-to-Speech**: AI responses are spoken using Piper TTS (local, offline)
 - ⚡ Single-page application (no routing)
 - 🔒 Type-safe TypeScript implementation
 
@@ -30,6 +32,7 @@ A simple AI chatbot with terminal-style UI built with React + TypeScript fronten
 - Python-dotenv (environment variables)
 - Motor (async MongoDB driver)
 - PyMongo (MongoDB driver)
+- Piper TTS (local text-to-speech engine)
 
 ## Project Structure
 
@@ -48,9 +51,15 @@ Isabella/
 │   ├── models/            # Data models
 │   │   └── chat.py
 │   ├── routes/            # API routes
-│   │   └── chat.py
+│   │   ├── chat.py
+│   │   └── tts.py
 │   ├── services/          # Business logic
-│   │   └── chat_service.py
+│   │   ├── chat_service.py
+│   │   └── tts_service.py
+│   ├── piper_tts/         # Piper TTS directory
+│   │   ├── piper/         # Piper binary
+│   │   ├── *.onnx         # Voice model files
+│   │   └── README.md      # TTS setup instructions
 │   ├── utils/             # Utilities
 │   │   └── logger.py
 │   ├── main.py            # FastAPI entry point
@@ -94,7 +103,23 @@ Isabella/
    echo "LONGCAT_API_KEY=your_actual_api_key_here" > .env
    ```
 
-6. Start the FastAPI server:
+6. **Setup Piper TTS (for text-to-speech):**
+   
+   a. Download Piper TTS binary for your platform:
+      - Visit: https://github.com/rhasspy/piper/releases
+      - Download the appropriate version for your OS
+      - Extract and place the `piper` executable in `backend/piper_tts/piper/`
+   
+   b. Download the en_US-amy-medium voice model:
+      - Visit: https://github.com/rhasspy/piper/releases/tag/2023.11.14-2
+      - Download `en_US-amy-medium.onnx` and `en_US-amy-medium.onnx.json`
+      - Place both files in `backend/piper_tts/`
+   
+   See `backend/piper_tts/README.md` for detailed instructions.
+   
+   **Note:** TTS is optional. The chatbot will work without it, but AI responses won't be spoken.
+
+7. Start the FastAPI server:
    ```bash
    uvicorn main:app --reload --port 5000
    ```
@@ -127,6 +152,9 @@ Isabella/
    - ⬜ OFF: Uses LongCat-Flash-Chat (faster, concise responses)
 4. Type your message and press Enter or click SEND
 5. The AI response will appear in the terminal window
+6. The chat window will automatically scroll to show new messages
+7. If TTS is configured, AI responses will be spoken automatically
+8. Audio controls appear below each AI message for manual playback
 
 ## API Endpoints
 
@@ -144,7 +172,8 @@ Send a message to the AI chatbot.
 **Response:**
 ```json
 {
-  "reply": "AI response here"
+  "reply": "AI response here",
+  "audio_file": "speech_uuid.wav"
 }
 ```
 
@@ -166,6 +195,29 @@ Fetch the last 50 messages from chat history.
   ]
 }
 ```
+
+### POST `/tts`
+Generate speech from text using Piper TTS.
+
+**Request Body:**
+```json
+{
+  "text": "Text to convert to speech"
+}
+```
+
+**Response:**
+```json
+{
+  "audio_file": "speech_uuid.wav"
+}
+```
+
+### GET `/tts/audio/{filename}`
+Retrieve a generated audio file.
+
+**Response:**
+- Audio file in WAV format
 
 ## Development
 

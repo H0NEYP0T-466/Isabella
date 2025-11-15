@@ -1,0 +1,8 @@
+.env
+piper_tts/output/
+piper_tts/piper/piper
+piper_tts/*.onnx
+piper_tts/*.json
+piper_tts
+model_after1stDATASET
+Isabella_emotion_distilbert_svm.pkl

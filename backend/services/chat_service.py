@@ -55,7 +55,7 @@ class ChatService:
 
     @staticmethod
     async def get_context_messages(limit: int = 10) -> List[Dict]:
-        """Get the last N messages for context window."""
+        """Get the last N messages for context window with timestamps."""
         try:
             db = Database.get_db()
             cursor = db.chats.find().sort("timestamp", -1).limit(limit)
@@ -64,9 +64,13 @@ class ChatService:
             # Reverse to get chronological order
             messages.reverse()
             
-            # Format for API context
+            # Format for API context with timestamps
             context = [
-                {"role": msg["role"], "content": msg["content"]}
+                {
+                    "role": msg["role"], 
+                    "content": msg["content"],
+                    "timestamp": msg["timestamp"].isoformat() if isinstance(msg.get("timestamp"), datetime) else str(msg.get("timestamp", ""))
+                }
                 for msg in messages
             ]
             

@@ -1,0 +1,14 @@
+.env
+piper_tts/output/
+piper_tts/piper/piper
+piper_tts/*.onnx
+piper_tts/*.json
+piper_tts
+model_after1stDATASET
+model_after2ndDATASET
+model_after3rdDATASET
+Isabella_emotion_distilbert_svm.pkl
+Isabella_emotion_checkpoint_goemotions_3.csv.pkl
+Isabella_emotion_checkpoint_goemotions_2.csv.pkl
+Isabella_emotion_distilbert_svm.pkl
+cumulative_training_data.npz

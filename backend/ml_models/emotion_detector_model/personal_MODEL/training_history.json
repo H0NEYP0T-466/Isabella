@@ -1,0 +1,32 @@
+[
+  {
+    "dataset_name": "goemotions_2.csv",
+    "timestamp": "2025-11-16 09:32:35",
+    "train_samples": 56000,
+    "cumulative_samples": 56000,
+    "metrics": {
+      "subset_accuracy": 0.009642857142857142,
+      "hamming_loss": 0.19434948979591837,
+      "macro_f1": 0.20370433107917757,
+      "micro_f1": 0.23243161553574126,
+      "weighted_f1": 0.30204782445699985,
+      "macro_precision": 0.12808010528951716,
+      "macro_recall": 0.6502689934739878
+    }
+  },
+  {
+    "dataset_name": "goemotions_3.csv",
+    "timestamp": "2025-11-16 11:21:55",
+    "train_samples": 56980,
+    "cumulative_samples": 112980,
+    "metrics": {
+      "subset_accuracy": 0.008002808002808002,
+      "hamming_loss": 0.20842150127864414,
+      "macro_f1": 0.2059273464069545,
+      "micro_f1": 0.22727061469962168,
+      "weighted_f1": 0.3085404733466073,
+      "macro_precision": 0.1291848400036463,
+      "macro_recall": 0.7126448741244412
+    }
+  }
+]

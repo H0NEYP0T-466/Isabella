@@ -1,11 +1,11 @@
 import React from 'react';
 
-interface ThinkingToggleProps {
-  thinking: boolean;
-  onToggle: (thinking: boolean) => void;
+interface IsolateToggleProps {
+  isolate: boolean;
+  onToggle: (isolate: boolean) => void;
 }
 
-const ThinkingToggle: React.FC<ThinkingToggleProps> = ({ thinking, onToggle }) => {
+const IsolateToggle: React.FC<IsolateToggleProps> = ({ isolate, onToggle }) => {
   return (
     <div style={{
       display: 'flex',
@@ -17,7 +17,7 @@ const ThinkingToggle: React.FC<ThinkingToggleProps> = ({ thinking, onToggle }) =
       <label style={{ color: '#00ff66', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <input
           type="checkbox"
-          checked={thinking}
+          checked={isolate}
           onChange={(e) => onToggle(e.target.checked)}
           style={{
             cursor: 'pointer',
@@ -25,13 +25,13 @@ const ThinkingToggle: React.FC<ThinkingToggleProps> = ({ thinking, onToggle }) =
             height: '18px'
           }}
         />
-        <span>Thinking</span>
+        <span>Isolate Message</span>
       </label>
       <span style={{ color: '#00ff66', opacity: 0.7 }}>
-        [{thinking ? 'LongCat-Think' : 'LongCat-Flash-Chat'}]
+        [{isolate ? 'No Context' : 'With Context'}]
       </span>
     </div>
   );
 };
 
-export default ThinkingToggle;
+export default IsolateToggle;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ChatWindow from './components/ChatWindow';
 import ThinkingToggle from './components/ThinkingToggle';
+import IsolateToggle from './components/IsolateToggle';
 import './App.css';
 
 interface Message {
@@ -22,6 +23,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
+  const [isolate, setIsolate] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -54,7 +56,8 @@ function App() {
     try {
       const response = await axios.post('http://localhost:5000/chat', {
         message: userMessage,
-        thinking: thinking
+        thinking: thinking,
+        isolate: isolate
       });
 
       const assistantMessage: Message = {
@@ -105,13 +108,14 @@ function App() {
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-start',
           alignItems: 'center',
           padding: '10px 0',
+          gap: '20px',
         }}
       >
-      
-      
+        <ThinkingToggle thinking={thinking} onToggle={setThinking} />
+        <IsolateToggle isolate={isolate} onToggle={setIsolate} />
       </div>
 
       <ChatWindow messages={messages} />
@@ -159,7 +163,6 @@ function App() {
           
           {loading ? 'SENDING...' : 'Send'}
         </button>
-        <ThinkingToggle thinking={thinking} onToggle={setThinking} />
       </div>
     </div>
   );

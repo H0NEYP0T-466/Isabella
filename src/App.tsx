@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ChatWindow from './components/ChatWindow';
 import ThinkingToggle from './components/ThinkingToggle';
+import IsolateToggle from './components/IsolateToggle';
 import './App.css';
 
 interface Message {
@@ -22,6 +23,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
+  const [isolate, setIsolate] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -54,7 +56,8 @@ function App() {
     try {
       const response = await axios.post('http://localhost:5000/chat', {
         message: userMessage,
-        thinking: thinking
+        thinking: thinking,
+        isolate: isolate
       });
 
       const assistantMessage: Message = {
@@ -107,11 +110,18 @@ function App() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '10px 0',
+          padding: '10px 20px',
+          borderBottom: '1px solid #333',
+          backgroundColor: '#0a0a0a',
         }}
       >
-      
-      
+        <div style={{ fontSize: '18px', color: '#0f0', fontWeight: 'bold' }}>
+          Isabella AI
+        </div>
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <ThinkingToggle thinking={thinking} onToggle={setThinking} />
+          <IsolateToggle isolate={isolate} onToggle={setIsolate} />
+        </div>
       </div>
 
       <ChatWindow messages={messages} />
@@ -156,10 +166,8 @@ function App() {
             fontWeight: 600,
           }}
         >
-          
           {loading ? 'SENDING...' : 'Send'}
         </button>
-        <ThinkingToggle thinking={thinking} onToggle={setThinking} />
       </div>
     </div>
   );

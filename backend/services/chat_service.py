@@ -64,9 +64,13 @@ class ChatService:
             # Reverse to get chronological order
             messages.reverse()
             
-            # Format for API context
+            # Format for API context with timestamps
             context = [
-                {"role": msg["role"], "content": msg["content"]}
+                {
+                    "role": msg["role"], 
+                    "content": msg["content"],
+                    "timestamp": msg["timestamp"].isoformat() if isinstance(msg.get("timestamp"), datetime) else str(msg.get("timestamp", ""))
+                }
                 for msg in messages
             ]
             

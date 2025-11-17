@@ -3,9 +3,11 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import httpx
 import os
+import time
 from typing import Optional
 from services.chat_service import ChatService
 from services.tts_service import TTSService
+from ml_models.emotion_detector_model.preTrainedModel.robertA_model import predict_emotions, format_emotions
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +37,36 @@ async def chat(request: ChatRequest):
     model = "LongCat-Thinker" if request.thinking else "LongCat-Flash-Chat"
     logger.info(f"Selected model: {model}")
     
+    # Get emotion configuration from environment
+    emotion_enable = os.getenv("EMOTION_ENABLE", "true").lower() == "true"
+    emotion_threshold = float(os.getenv("EMOTION_THRESHOLD", "0.35"))
+    emotion_top_k_str = os.getenv("EMOTION_TOP_K")
+    emotion_top_k = int(emotion_top_k_str) if emotion_top_k_str else None
+    
+    # Detect emotions if enabled
+    detected_emotions = []
+    emotion_time = 0.0
+    if emotion_enable and request.message.strip():
+        try:
+            logger.info("🎭 Running emotion detection...")
+            emotion_start = time.time()
+            detected_emotions = predict_emotions(
+                request.message,
+                threshold=emotion_threshold,
+                top_k=emotion_top_k
+            )
+            emotion_time = time.time() - emotion_start
+            
+            if detected_emotions:
+                logger.info(f"✅ Detected emotions (took {emotion_time:.3f}s):")
+                for emotion, confidence in detected_emotions:
+                    logger.info(f"   - {emotion}: {confidence:.2f}")
+            else:
+                logger.info(f"ℹ️ No emotions detected above threshold (took {emotion_time:.3f}s)")
+        except Exception as e:
+            logger.warning(f"⚠️ Emotion detection failed (non-critical): {str(e)}")
+            detected_emotions = []
+    
     try:
         await ChatService.save_message(
             role="user",
@@ -45,15 +77,32 @@ async def chat(request: ChatRequest):
         
         context_messages = await ChatService.get_context_messages(limit=10)
         
+        # Build system message with optional emotion context
+        base_system_content = (
+            "You are Isabella/bella. "
+            "This is a conversation between you and a human user. Use the context of previous messages to inform your replies."
+            + str(context_messages) +
+            "now, respond to the user's latest message."
+        )
+        
+        # Add emotion context if emotions were detected
+        if detected_emotions:
+            formatted_emotions = format_emotions(detected_emotions)
+            emotion_context = f"""
+
+Current user emotional state (multi-label):
+{formatted_emotions}
+Guidelines:
+1. Acknowledge the expressed emotions succinctly and naturally.
+2. Adjust tone: supportive for distress, encouraging for anxiety/anticipation, celebratory for positive emotions.
+3. Do not infer emotions not listed.
+4. Preserve all existing system rules and persona instructions."""
+            base_system_content += emotion_context
+        
         messages = [
             {
                 "role": "system",
-                "content": (
-                    "You are Isabella/bella."
-                    "This is a conversation between you and a human user. Use the context of previous messages to inform your replies."
-                    + str(context_messages) +
-                    "now, respond to the user's latest message."
-                )
+                "content": base_system_content
             },
             {"role": "user", "content": request.message}
         ]
@@ -79,6 +128,7 @@ async def chat(request: ChatRequest):
         }
         
         logger.info("🔄 Calling LongCat API...")
+        llm_start = time.time()
         
         async with httpx.AsyncClient() as client:
             response = await client.post(longcat_url, headers=headers, json=payload, timeout=30.0)
@@ -86,8 +136,9 @@ async def chat(request: ChatRequest):
             data = response.json()
             
             ai_reply = data["choices"][0]["message"]["content"]
+            llm_time = time.time() - llm_start
             
-            logger.info(f"✓ Received AI response - Length: {len(ai_reply)} chars")
+            logger.info(f"✓ Received AI response - Length: {len(ai_reply)} chars (took {llm_time:.3f}s)")
             logger.info(f"AI response preview: {ai_reply[:200]}...")
 
             await ChatService.save_message(
@@ -99,15 +150,19 @@ async def chat(request: ChatRequest):
             
             # Generate TTS audio for the AI response
             audio_filename: Optional[str] = None
+            tts_time = 0.0
             try:
                 logger.info("🔊 Generating TTS audio for AI response...")
+                tts_start = time.time()
                 audio_filename = await TTSService.generate_speech(ai_reply)
-                logger.info(f"✓ TTS audio generated: {audio_filename}")
+                tts_time = time.time() - tts_start
+                logger.info(f"✓ TTS audio generated: {audio_filename} (took {tts_time:.3f}s)")
             except Exception as tts_error:
                 logger.warning(f"⚠️ TTS generation failed (non-critical): {str(tts_error)}")
                 # Continue without TTS if it fails
             
             logger.info("✓ Chat request completed successfully")
+            logger.info(f"⏱️ Performance Summary: Emotion={emotion_time:.3f}s | LLM={llm_time:.3f}s | TTS={tts_time:.3f}s | Total={emotion_time+llm_time+tts_time:.3f}s")
             logger.info("=" * 80)
             
             return ChatResponse(reply=ai_reply, audio_file=audio_filename)

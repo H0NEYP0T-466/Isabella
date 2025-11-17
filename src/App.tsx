@@ -22,6 +22,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
+  const [isolate, setIsolate] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -54,7 +55,8 @@ function App() {
     try {
       const response = await axios.post('http://localhost:5000/chat', {
         message: userMessage,
-        thinking: thinking
+        thinking: thinking,
+        isolate: isolate
       });
 
       const assistantMessage: Message = {
@@ -107,11 +109,41 @@ function App() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '10px 0',
+          padding: '10px 20px',
+          borderBottom: '1px solid #333',
+          gap: '20px',
         }}
       >
-      
-      
+        <div style={{ color: '#0f0', fontSize: '18px', fontWeight: 'bold' }}>
+          Isabella AI
+        </div>
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <ThinkingToggle thinking={thinking} onToggle={setThinking} />
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontFamily: 'monospace',
+            fontSize: '14px'
+          }}>
+            <label style={{ color: '#00ff66', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input
+                type="checkbox"
+                checked={isolate}
+                onChange={(e) => setIsolate(e.target.checked)}
+                style={{
+                  cursor: 'pointer',
+                  width: '18px',
+                  height: '18px'
+                }}
+              />
+              <span>Isolate Message</span>
+            </label>
+            <span style={{ color: '#00ff66', opacity: 0.7 }}>
+              [{isolate ? 'No Context' : 'With Context'}]
+            </span>
+          </div>
+        </div>
       </div>
 
       <ChatWindow messages={messages} />
@@ -120,7 +152,7 @@ function App() {
         style={{
           display: 'flex',
           marginTop: '5px',
-          padding: '0 0',
+          padding: '0 20px',
           alignItems: 'center',
           gap: '8px',
         }}
@@ -159,7 +191,6 @@ function App() {
           
           {loading ? 'SENDING...' : 'Send'}
         </button>
-        <ThinkingToggle thinking={thinking} onToggle={setThinking} />
       </div>
     </div>
   );

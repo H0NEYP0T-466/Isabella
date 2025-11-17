@@ -24,6 +24,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
       style={{
         flex: 1,
         overflowY: 'auto',
+        padding: '20px',
       }}
     >
       {messages.length === 0 ? null : (

@@ -11,7 +11,6 @@ const ThinkingToggle: React.FC<ThinkingToggleProps> = ({ thinking, onToggle }) =
       display: 'flex',
       alignItems: 'center',
       gap: '10px',
-      marginBottom: '10px',
       fontFamily: 'monospace',
       fontSize: '14px'
     }}>

@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/H0NEYP0T-466/Isabella/discussions
+    about: Join discussions, ask questions, and share ideas with the community
+  - name: 🛡️ Security Issue
+    url: https://github.com/H0NEYP0T-466/Isabella/security
+    about: Report security vulnerabilities privately through GitHub Security Advisories
+  - name: ❓ Q&A and Support
+    url: https://github.com/H0NEYP0T-466/Isabella/discussions/categories/q-a
+    about: Get help and support from the community
+  - name: 📚 Documentation
+    url: https://github.com/H0NEYP0T-466/Isabella/blob/main/README.md
+    about: Read the project documentation, setup guides, and API reference

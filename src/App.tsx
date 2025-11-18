@@ -110,8 +110,10 @@ function App() {
           display: 'flex',
           justifyContent: 'flex-start',
           alignItems: 'center',
-          padding: '10px 0',
-          gap: '20px',
+          padding: '15px 20px',
+          gap: '30px',
+          borderBottom: '1px solid #333',
+          marginBottom: '10px',
         }}
       >
         <ThinkingToggle thinking={thinking} onToggle={setThinking} />
